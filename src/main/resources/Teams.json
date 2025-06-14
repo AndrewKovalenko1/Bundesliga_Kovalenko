@@ -1,0 +1,51 @@
+[ {
+  "name" : "Bayern München",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "Borussia Dortmund",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "RB Leipzig",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "Bayer Leverkusen",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "VfL Wolfsburg",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "Eintracht Frankfurt",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "FC Schalke 04",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "Borussia Mönchengladbach",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "1. FC Union Berlin",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+}, {
+  "name" : "VfB Stuttgart",
+  "punkte" : 0,
+  "tore" : 0,
+  "gegentore" : 0
+} ]
