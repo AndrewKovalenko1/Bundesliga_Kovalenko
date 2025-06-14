@@ -26,7 +26,7 @@ public class Match {
         return heimteam;
     }
 
-    public Team getAuswaertsream() {
+    public Team getAuswaertsteam() {
         return auswaertsream;
     }
 

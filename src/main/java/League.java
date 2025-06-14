@@ -13,100 +13,102 @@ public class League {
     private final HashSet<Spieltag> splieltaege;
 
     public League() {
-        this.teams = readTeamsFromFile();
+        this.teams = lesenTeamsAusDatei();
         this.splieltaege = new HashSet<>();
         getSpielern();
     }
 
     //region Simulate
-    public void playMatchday() {
-        boolean esGibtMatch = true;
-        int spieltagNumber = splieltaege.size() + 1;
-        ArrayList <Match> matches = new ArrayList<>();
-        //матчі, які при додаванні яких ми не можемо вибрати 5 за один тур
-        ArrayList <Match> verbotenMatches = new ArrayList<>();
+    public void austragenSpieltag() {
+        boolean esGibtSpiel = true;
+        int spieltagNummer = splieltaege.size() + 1;
+        ArrayList <Match> spiele = new ArrayList<>();
+        // Spiele, bei deren Hinzufügung wir nicht 5 pro Spieltag auswählen können
+        ArrayList <Match> verbotenSpiele = new ArrayList<>();
         //array mit teams ohne matches für heute
-        ArrayList <Team> teamsToPlan = new ArrayList<>(teams);
+        ArrayList <Team> teamsZuPlanen = new ArrayList<>(teams);
 
-        //10 teams - 5 matches
-        while (esGibtMatch && matches.size() <= 5) {
-            esGibtMatch = false;
-            for (Team team1 : teamsToPlan) {
+        //10 teams - 5 spiele
+        while (esGibtSpiel && spiele.size() <= 5) {
+            esGibtSpiel = false;
+            for (Team team1 : teamsZuPlanen) {
                 boolean warHeim, warAuswaerts;
-                for (Team team2 : teamsToPlan) {
+                for (Team team2 : teamsZuPlanen) {
                     if (team1 == team2) {
                         continue;
                     }
-                    //перевіряємо чи була team1 господарем а team2 гостями
-                    warHeim = isWarHeim(team1, team2, verbotenMatches);
-                    // якщо team1 вже була господарем в матчі з team2, то треба перевірити, чи не було ще гостьового матчу
+                    // Wir prüfen, ob team1 Gastgeber und team2 Gast war
+                    warHeim = istWarHeim(team1, team2, verbotenSpiele);
+                    // Wenn team1 bereits Gastgeber im Spiel gegen team2 war,
+                    // muss geprüft werden, ob es kein Auswärtsspiel gab
                     if (warHeim) {
-                        warAuswaerts = isWarHeim(team2, team1, verbotenMatches);
+                        warAuswaerts = istWarHeim(team2, team1, verbotenSpiele);
                     }  else {
-                        // якщо team1 ще не була господарем в матчі з team2, значить можемо організовувати матч
-                        matches.add(new Match(team1, team2));
-                        //esGibtMatch = simulateMatch(team1, team2, matches, teamsToPlan);
-                        esGibtMatch = true;
-                        teamsToPlan.remove(team1);
-                        teamsToPlan.remove(team2);
+                        // Wenn team1 noch nicht Gastgeber im Spiel gegen team2 war, können wir das Spiel organisieren
+                        spiele.add(new Match(team1, team2));
+                        esGibtSpiel = true;
+                        teamsZuPlanen.remove(team1);
+                        teamsZuPlanen.remove(team2);
                         break;
                     }
-                    //те ж саме, але якщо наша перша команда є гостьова
+                    // Dasselbe, aber wenn unser erstes Team Gast ist
                     if (!warAuswaerts) {
-                        matches.add(new Match(team2, team1));
-                        //esGibtMatch = simulateMatch(team2, team1, matches, teamsToPlan);
-                        esGibtMatch = true;
-                        teamsToPlan.remove(team1);
-                        teamsToPlan.remove(team2);
+                        spiele.add(new Match(team2, team1));
+                        esGibtSpiel = true;
+                        teamsZuPlanen.remove(team1);
+                        teamsZuPlanen.remove(team2);
                         break;
                     }
                 }
-                //матч відбувся, то почнемо з початку списку команд, що ще не грали.
-                if (esGibtMatch) {
+                // Das Spiel hat stattgefunden, daher beginnen wir wieder am Anfang der Liste der Teams,
+                // die noch nicht gespielt haben.
+                if (esGibtSpiel) {
                     break;
                 }
             }
 
-            //компенсація звужувального та повторювального вибору
-            // застосовуємо цю умову, якщо базово по виборці маємо хоч один матч
-            if (!esGibtMatch && matches.size() < 5 && !matches.isEmpty()) {
-                //ми маємо залишитись в циклі
-                esGibtMatch = true;
-                //ми поступово накопичуємо незручні матчі. Перевіримо, можливо їх вже стільки що нам вистачить на цілий тур
-                if(verbotenMatches.size() >= 5 - matches.size()){
-                    ArrayList <Match> additionalMatches = new ArrayList<>();
-                    for (Match match : verbotenMatches) {
-                        // перевіряємо що у відібраних нема ще такого матчу
-                        boolean isNewMatch = matches.stream()
-                                .anyMatch(n->n.getHeimteam()== match.getHeimteam() && n.getAuswaertsream() == match.getAuswaertsream());
+            // Kompensation der einschränkenden und wiederholenden Auswahl
+            // Diese Bedingung wird angewendet, wenn in der Grundauswahl mindestens ein Spiel vorhanden ist
+            if (!esGibtSpiel && spiele.size() < 5 && !spiele.isEmpty()) {
+                // Wir müssen in der Schleife bleiben
+                esGibtSpiel = true;
+                // Wir sammeln nach und nach unangenehme Spiele.
+                // Prüfen wir, ob es bereits genug sind, um einen ganzen Spieltag zu füllen
+                if(verbotenSpiele.size() >= 5 - spiele.size()){
+                    ArrayList <Match> zusaetzlicheSpiele = new ArrayList<>();
+                    for (Match spiel : verbotenSpiele) {
+                        // Wir prüfen, dass es in den ausgewählten noch kein solches Spiel gibt
+                        boolean isNewMatch = spiele.stream()
+                                .anyMatch(n->n.getHeimteam()== spiel.getHeimteam() && n.getAuswaertsteam() == spiel.getAuswaertsteam());
                         if(!isNewMatch) {
-                            //спочатку додаємо в проміжний список, адже може підходящих матчів не вистачить
-                            //для формування дня і треба буде піднабрати ще
-                            additionalMatches.add(match);
-                            //перевіряємо, якщо у нас вже достатньо додаткових матчів для формування туру
-                            //то формуємо і вивалюємось звідусіль
-                            if (additionalMatches.size() == 5 - matches.size()){
-                                matches.addAll(additionalMatches);
+                            // Zuerst fügen wir in die Zwischenauswahl hinzu, da möglicherweise
+                            // nicht genügend passende Spiele für die Spieltagbildung vorhanden sind
+                            // und wir noch ergänzen müssen
+                            zusaetzlicheSpiele.add(spiel);
+                            // Wir prüfen, ob wir bereits genügend zusätzliche Spiele für die Spieltagbildung haben
+                            // Dann bilden wir den Spieltag und steigen aus allen Schleifen aus
+                            if (zusaetzlicheSpiele.size() == 5 - spiele.size()){
+                                spiele.addAll(zusaetzlicheSpiele);
                                 break;
                             }
                         }
                     }
                 }
-                if (matches.size() < 5) {
-                    Match lastMatch = matches.getLast();
-                    teamsToPlan.add(lastMatch.getHeimteam());
-                    teamsToPlan.add(lastMatch.getAuswaertsream());
-                    matches.remove(lastMatch);
-                    verbotenMatches.add(lastMatch);
+                if (spiele.size() < 5) {
+                    Match lastMatch = spiele.getLast();
+                    teamsZuPlanen.add(lastMatch.getHeimteam());
+                    teamsZuPlanen.add(lastMatch.getAuswaertsteam());
+                    spiele.remove(lastMatch);
+                    verbotenSpiele.add(lastMatch);
                 }
             }
         }
-        //якщо відбувся хоча б один матч, значить тур відбувся
-        if(!matches.isEmpty()) {
-            for (Match match : matches) {
+        // Wenn mindestens ein Spiel stattgefunden hat, hat der Spieltag stattgefunden
+        if(!spiele.isEmpty()) {
+            for (Match match : spiele) {
                 match.simulate();
             }
-            Spieltag spieltag = new Spieltag(matches, spieltagNumber);
+            Spieltag spieltag = new Spieltag(spiele, spieltagNummer);
             this.splieltaege.add(spieltag);
             malenSpieltagTabelle(spieltag);
         } else {
@@ -114,18 +116,18 @@ public class League {
         }
     }
 
-    private boolean isWarHeim(Team team1, Team team2, ArrayList<Match> verbotenMatches) {
+    private boolean istWarHeim(Team team1, Team team2, ArrayList<Match> verbotenMatches) {
         boolean warHeim = false;
         for (Match match : verbotenMatches) {
-            if(team1 == match.getHeimteam() && team2 == match.getAuswaertsream()){
+            if(team1 == match.getHeimteam() && team2 == match.getAuswaertsteam()){
                 return true;
             }
         }
         for (Spieltag spieltag : splieltaege){
              warHeim = spieltag.getSpiele().stream()
-                    .anyMatch(n->n.getHeimteam()== team1 && n.getAuswaertsream() == team2);
+                    .anyMatch(n->n.getHeimteam()== team1 && n.getAuswaertsteam() == team2);
             if (warHeim) {
-                //якщо так то далі не перевіряємо.
+                // Wenn ja, prüfen wir nicht weiter
                 break;
             }
         }
@@ -138,7 +140,7 @@ public class League {
         Scanner scanner = new Scanner(System.in);
         Player player1 = null,player2 = null;
         Team team1 = null, team2 = null;
-        System.out.print("Enter name first player: ");
+        System.out.print("Name des ersten Spielers eingeben: ");
         String name1 = scanner.nextLine();
         for (Team team : teams) {
             Optional<Player>  optSpieler = team.getSpielern().stream().filter(n->n.getName().equals(name1)).findAny();
@@ -149,11 +151,11 @@ public class League {
             }
         }
         if (player1 == null) {
-            System.out.println("First player is no exist. Try to enter his name correctly");
+            System.out.println("Der erste Spieler existiert nicht. Bitte geben Sie seinen Namen korrekt ein.");
             return;
         }
 
-        System.out.print("Enter name second player: ");
+        System.out.print("Name des zweiten Spielers eingeben: ");
         String name2 = scanner.nextLine();
         for (Team team : teams) {
             Optional<Player>  optSpieler = team.getSpielern().stream().filter(n->n.getName().equals(name2)).findAny();
@@ -164,27 +166,27 @@ public class League {
             }
         }
         if (player2 == null) {
-            System.out.println("Second player is no exist. Try to enter his name correctly");
+            System.out.println("Der zweite Spieler existiert nicht. Bitte geben Sie seinen Namen korrekt ein.");
             return;
         }
 
         if (team1 == team2) {
-            System.out.println("Your players are in one team (" + team1.getName() + "). You cant transfer them ");
+            System.out.println("Ihre Spieler sind im selben Team (" + team1.getName() + "). Sie können sie nicht transferieren ");
             return;
         }
 
         boolean istFortgesetzt = true;
-        System.out.printf("Do you want to transfer %s from %s to %s from %s? y/n: ",
+        System.out.printf("Möchten Sie %s von %s zu %s von %s transferieren? j/n: ",
                 name1, team1.getName(), name2, team2.getName());
         do {
 
             String wahl = scanner.nextLine();
             switch (wahl) {
-                case "y":
+                case "j":
                     team1.setSpieler(player2);
                     team2.setSpieler(player1);
-                    team1.removeSpieler(player1);
-                    team2.removeSpieler(player2);
+                    team1.entfernenSpieler(player1);
+                    team2.entfernenSpieler(player2);
                     System.out.println("Transfer ist fertig!");
                     break;
                 case "n":
@@ -192,7 +194,7 @@ public class League {
                     istFortgesetzt = false;
                     break;
                default:
-                   System.out.println("Enter only 'y' for 'yes' or 'n' for 'no'");
+                   System.out.println("Geben Sie nur 'j' für 'ja' oder 'n' für 'nein' ein");
                    break;
             }
         } while (istFortgesetzt);
@@ -204,15 +206,15 @@ public class League {
 
     //region Show tables
 
-    public void showSpiele() {
+    public void anzeigenSpiele() {
         Scanner scanner = new Scanner(System.in);
         String wahl;
         boolean istFortgesetzt = true;
         String menue = """                    
-                    Choose option to print plays:
-                    1 - Print one Spielertag
-                    2 - Print all games
-                    Jede andere Eingabe - Print beenden
+                    Wählen Sie die Option zum Drucken der Spiele:
+                       1 - Einen Spieltag drucken
+                       2 - Alle Spiele drucken
+                       Jede andere Eingabe - Drucken beenden
                 \s""";
         System.out.print(menue);
         do {
@@ -220,7 +222,7 @@ public class League {
             wahl = scanner.nextLine();
             switch (wahl) {
                 case "1":
-                    System.out.print("\nEnter number Spieltag: ");
+                    System.out.print("\nSpieltag-Nummer eingeben: ");
                     if (scanner.hasNextInt()) {
                         int numberSpieltag = scanner.nextInt();
                         Optional<Spieltag> optMatch = splieltaege.stream().filter(n->n.getNumber()==numberSpieltag).findAny();
@@ -229,11 +231,11 @@ public class League {
                             malenSpieltagTabelle(spieltag);
                         }
                         else {
-                            System.out.println("We didnt find Spieltag with number " + numberSpieltag);
+                            System.out.println("Wir haben keinen Spieltag mit der Nummer " + numberSpieltag + " gefunden");
                         }
                     }
                     else{
-                        System.out.println("\nYou entered incorrect value. Operation beendet");
+                        System.out.println("\nSie haben einen falschen Wert eingegeben. Vorgang beendet.");
                     }
                     break;
                 case "2":
@@ -251,25 +253,25 @@ public class League {
     }
 
     public void malenSpieltagTabelle(Spieltag spieltag) {
-        StringBuilder table = new StringBuilder();
-        table.append("Spieltag ").append(spieltag.getNumber()).append('\n');
+        StringBuilder tabelle = new StringBuilder();
+        tabelle.append("Spieltag ").append(spieltag.getNumber()).append('\n');
         for (Match match : spieltag.getSpiele()) {
-            table.append("\n -").append(match.getHeimteam().getName())
+            tabelle.append("\n -").append(match.getHeimteam().getName())
                     .append(' ').append(match.getToreHeim()).append(':').append(match.getToreAuswaerts())
-                    .append(' ').append(match.getAuswaertsream().getName());
+                    .append(' ').append(match.getAuswaertsteam().getName());
         }
-        System.out.println(table);
+        System.out.println(tabelle);
     }
 
-    public void showSpielern() {
+    public void anzeigenSpielern() {
         Scanner scanner = new Scanner(System.in);
         String wahl;
         boolean istFortgesetzt = true;
         String menue = """                    
-                    Choose option to print plays:
-                    1 - Print Spielern von ein Team
-                    2 - Print all Spielern
-                    Jede andere Eingabe - Print beenden
+                    Wählen Sie die Option zum Drucken der Spieler:
+                       1 - Spieler eines Teams drucken
+                       2 - Alle Spieler drucken
+                       Jede andere Eingabe - Drucken beenden
                 \s""";
         System.out.print(menue);
         do {
@@ -277,7 +279,7 @@ public class League {
             wahl = scanner.nextLine();
             switch (wahl) {
                 case "1":
-                    System.out.print("\nEnter Team name: ");
+                    System.out.print("\nTeamnamen eingeben: ");
                     String teamName = scanner.nextLine();
                     Optional<Team> optTeam = teams.stream().filter(n->n.getName().equals(teamName)).findAny();
                     if(optTeam.isPresent()) {
@@ -285,7 +287,7 @@ public class League {
                         malenSpeilernTabelle(team);
                     }
                     else {
-                        System.out.println("We didnt find team with name " + teamName);
+                        System.out.println("WWir haben kein Team mit dem Namen gefunden " + teamName);
                     }
                     break;
                 case "2":
@@ -312,7 +314,7 @@ public class League {
         System.out.println(table);
     }
 
-    public void showTeamsTable(){
+    public void anzeigenMannschaftstabelle(){
         teams.sort(Comparator.comparing(Team::getPunkte).reversed());
 
         StringBuilder table = new StringBuilder();
@@ -331,7 +333,7 @@ public class League {
     //endregion
 
     //region Arbeit mit Dateien
-    private ArrayList<Team> readTeamsFromFile() {
+    private ArrayList<Team> lesenTeamsAusDatei() {
         ArrayList<Team> teams = new ArrayList<>();
         int punkte, tore, gegentore;
         String name;
@@ -352,7 +354,7 @@ public class League {
        return teams;
     }
 
-    public void writeTeamsInFile(boolean istNeueTabelle) {
+    public void schreibenTeamsInDatei(boolean istNeueTabelle) {
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode arrayNode = mapper.createArrayNode();
 

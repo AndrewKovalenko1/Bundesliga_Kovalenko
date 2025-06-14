@@ -10,17 +10,17 @@ public class Main {
 
         boolean istFortgesetzt = true;
         String menue = """
-                  Bundesliga simulation
-                    Wählen Sie die Aktion, die Sie ausführen möchten:
-                    1 - Simulate one tour
-                    2 - New championship
-                    3 - Transfer
-                    4 - Print teams table
-                    5 - Print players
-                    6 - print Matches
-                    7 - Write team results in file
-                    m - Menü anzeigen
-                    Jede andere Eingabe - Programm beenden
+                  Bundesliga-Simulation
+                  Wählen Sie die Aktion, die Sie ausführen möchten:
+                  1 - Eine Runde simulieren
+                  2 - Neue Meisterschaft
+                  3 - Transfer
+                  4 - Mannschaftstabelle anzeigen
+                  5 - Spieler anzeigen
+                  6 - Spiele anzeigen
+                  7 - Mannschaftsergebnisse in Datei schreiben
+                  m - Menü anzeigen
+                  Jede andere Eingabe - Programm beenden
                 \s""";
         System.out.print(menue);
         do {
@@ -28,26 +28,26 @@ public class Main {
             wahl = scanner.nextLine();
             switch (wahl) {
                 case "1":
-                    league.playMatchday();
+                    league.austragenSpieltag();
                     break;
                 case "2":
                     league = new League();
-                    league.writeTeamsInFile(true);
+                    league.schreibenTeamsInDatei(true);
                     break;
                 case "3":
                     league.transfer();
                     break;
                 case "4":
-                    league.showTeamsTable();
+                    league.anzeigenMannschaftstabelle();
                     break;
                 case "5":
-                    league.showSpielern();
+                    league.anzeigenSpielern();
                     break;
                 case "6":
-                    league.showSpiele();
+                    league.anzeigenSpiele();
                     break;
                 case "7":
-                    league.writeTeamsInFile(false);
+                    league.schreibenTeamsInDatei(false);
                     break;
                 case "m":
                     System.out.println(menue);

@@ -30,7 +30,7 @@ public class Team {
         this.spielern.add(spieler);
     }
 
-    public void removeSpieler(Player spieler) {
+    public void entfernenSpieler(Player spieler) {
         this.spielern.remove(spieler);
     }
 
