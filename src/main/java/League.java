@@ -10,11 +10,11 @@ import java.util.*;
 public class League {
     private final ArrayList<Team> teams;
 
-    private final HashSet<Spieltag> splieltaege;
+    private final ArrayList<Spieltag> splieltaege;
 
     public League() {
         this.teams = lesenTeamsAusDatei();
-        this.splieltaege = new HashSet<>();
+        this.splieltaege = new ArrayList<>();
         getSpielern();
     }
 
@@ -188,6 +188,7 @@ public class League {
                     team1.entfernenSpieler(player1);
                     team2.entfernenSpieler(player2);
                     System.out.println("Transfer ist fertig!");
+                    istFortgesetzt = false;
                     break;
                 case "n":
                    System.out.println("Ok, keine Transfer");
@@ -199,8 +200,7 @@ public class League {
             }
         } while (istFortgesetzt);
         scanner.close();
-
-
+        System.out.println("\nZurück zum Hauptmenü");
     }
     //endregion
 
@@ -225,6 +225,7 @@ public class League {
                     System.out.print("\nSpieltag-Nummer eingeben: ");
                     if (scanner.hasNextInt()) {
                         int numberSpieltag = scanner.nextInt();
+                        scanner.nextLine();
                         Optional<Spieltag> optMatch = splieltaege.stream().filter(n->n.getNumber()==numberSpieltag).findAny();
                         if(optMatch.isPresent()) {
                             Spieltag spieltag = optMatch.get();
@@ -245,8 +246,8 @@ public class League {
                     }
                     break;
                 default:
+                    System.out.println("\nZurück zum Hauptmenü");
                     istFortgesetzt = false;
-                    scanner.close();
                     break;
             }
         } while (istFortgesetzt);
@@ -297,8 +298,8 @@ public class League {
                     }
                     break;
                 default:
+                    System.out.println("\nZurück zum Hauptmenü");
                     istFortgesetzt = false;
-                    scanner.close();
                     break;
             }
         } while (istFortgesetzt);
