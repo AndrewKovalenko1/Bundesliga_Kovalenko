@@ -113,6 +113,7 @@ public class League {
             malenSpieltagTabelle(spieltag);
         } else {
             System.out.println("Es gibt keine Spielen mehr");
+            System.out.println("\nZurück zum Hauptmenü");
         }
     }
 
